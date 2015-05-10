@@ -1,8 +1,9 @@
 var irc = require('irc')
 var request = require('request')
 var JSONStream = require('JSONStream')
+var stringEscape = require('string-escape')
 
-module.exports = function (opts) {  
+module.exports = function (opts) {
   var headers = {
     'Accept': 'application/json',
     'Authorization': 'Bearer ' + opts.gitterApiKey
@@ -35,11 +36,11 @@ module.exports = function (opts) {
           .pipe(JSONStream.parse())
           .on('data', function (message) {
             if(message.fromUser.username === gitterName) return
-            var text = '(' + message.fromUser.username + ') ' + message.text
+            var text = '(' + message.fromUser.username + ') ' + stringEscape(message.text)
             console.log('gitter:', text)
             ircClient.say(opts.ircChannel, text)
           })
-            
+
         ircClient.on('message' + opts.ircChannel, function (from, message) {
           if(from === opts.ircNick) return
           var text = '`' + from + '` ' + message
@@ -52,4 +53,3 @@ module.exports = function (opts) {
     })
   })
 }
-
